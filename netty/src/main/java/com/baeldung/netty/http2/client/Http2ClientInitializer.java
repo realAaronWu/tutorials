@@ -33,6 +33,9 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
             ChannelPipeline pipeline = ch.pipeline();
             pipeline.addLast(sslCtx.newHandler(ch.alloc(), host, port));
             pipeline.addLast(Http2Util.getClientAPNHandler(maxContentLength, settingsHandler, responseHandler));
+        } else {
+            ChannelPipeline pipeline = ch.pipeline();
+            pipeline.addLast(Http2Util.getClientAPNHandler(maxContentLength, settingsHandler, responseHandler));
         }
     }
 

@@ -12,12 +12,17 @@ import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
 import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.util.CharsetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
+import java.util.Map;
 
 @Sharable
 public class Http2ServerResponseHandler extends ChannelDuplexHandler {
 
     static final ByteBuf RESPONSE_BYTES = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer("Hello World", CharsetUtil.UTF_8));
-
+    private static final Logger logger = LoggerFactory.getLogger(Http2ServerResponseHandler.class);
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
@@ -30,6 +35,11 @@ public class Http2ServerResponseHandler extends ChannelDuplexHandler {
         if (msg instanceof Http2HeadersFrame) {
             Http2HeadersFrame msgHeader = (Http2HeadersFrame) msg;
             if (msgHeader.isEndStream()) {
+                Iterator<Map.Entry<CharSequence, CharSequence>> iterator =msgHeader.headers().iterator();
+                while (iterator.hasNext()){
+                    Map.Entry<CharSequence, CharSequence> entry = iterator.next();
+                    logger.info("header {} {}",entry.getKey(), entry.getValue());
+                }
                 ByteBuf content = ctx.alloc()
                     .buffer();
                 content.writeBytes(RESPONSE_BYTES.duplicate());

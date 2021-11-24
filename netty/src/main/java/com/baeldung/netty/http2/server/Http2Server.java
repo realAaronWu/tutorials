@@ -38,6 +38,9 @@ public final class Http2Server {
                         if (sslCtx != null) {
                             ch.pipeline()
                                 .addLast(sslCtx.newHandler(ch.alloc()), Http2Util.getServerAPNHandler());
+                        } else {
+                            ch.pipeline()
+                                    .addLast(Http2Util.getServerAPNHandler());
                         }
                     }
 
