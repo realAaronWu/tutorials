@@ -6,11 +6,7 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
-import io.netty.handler.codec.http2.DefaultHttp2Headers;
-import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
-import io.netty.handler.codec.http2.Http2Headers;
-import io.netty.handler.codec.http2.Http2HeadersFrame;
+import io.netty.handler.codec.http2.*;
 import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +30,16 @@ public class Http2ServerResponseHandler extends ChannelDuplexHandler {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Http2HeadersFrame) {
             Http2HeadersFrame msgHeader = (Http2HeadersFrame) msg;
+            String streamId = (String) msgHeader.headers()
+                    .get(HttpConversionUtil.ExtensionHeaderNames.STREAM_ID.text());
+            logger.info("streamId {}", streamId);
             if (msgHeader.isEndStream()) {
                 Iterator<Map.Entry<CharSequence, CharSequence>> iterator =msgHeader.headers().iterator();
                 while (iterator.hasNext()){
                     Map.Entry<CharSequence, CharSequence> entry = iterator.next();
                     logger.info("header {} {}",entry.getKey(), entry.getValue());
                 }
+
                 ByteBuf content = ctx.alloc()
                     .buffer();
                 content.writeBytes(RESPONSE_BYTES.duplicate());
